@@ -1,0 +1,398 @@
+{
+    "description": "Survey",
+    "states": [
+      {
+        "name": "Trigger",
+        "type": "trigger",
+        "transitions": [
+          {
+            "event": "incomingMessage"
+          },
+          {
+            "next": "Welcome",
+            "event": "incomingCall"
+          },
+          {
+            "event": "incomingRequest"
+          },
+          {
+            "next": "Welcome",
+            "event": "incomingParent"
+          }
+        ],
+        "properties": {
+          "offset": {
+            "x": -160,
+            "y": -130
+          }
+        }
+      },
+      {
+        "name": "FirstQuestion",
+        "type": "gather-input-on-call",
+        "transitions": [
+          {
+            "next": "WithinRangeDigit1",
+            "event": "keypress"
+          },
+          {
+            "next": "WithinRangeSpeech1",
+            "event": "speech"
+          },
+          {
+            "next": "FirstQuestion",
+            "event": "timeout"
+          }
+        ],
+        "properties": {
+          "voice": "alice",
+          "offset": {
+            "x": -50,
+            "y": 310
+          },
+          "hints": "1,2,3,4,5",
+          "finish_on_key": "#",
+          "say": "On a scale from 1 - 5, where 1 means \"very happy\" and 5 \"not happy at all\". How happy where you with the help provided by our agent?",
+          "language": "en-US",
+          "stop_gather": false,
+          "profanity_filter": "true",
+          "timeout": 7,
+          "number_of_digits": 1,
+          "speech_timeout": "auto",
+          "loop": 1,
+          "gather_language": "de-DE"
+        }
+      },
+      {
+        "name": "SecondQuestion",
+        "type": "gather-input-on-call",
+        "transitions": [
+          {
+            "next": "WithinRangeDigit2",
+            "event": "keypress"
+          },
+          {
+            "next": "WithinRangeSpeech2",
+            "event": "speech"
+          },
+          {
+            "next": "SecondQuestion",
+            "event": "timeout"
+          }
+        ],
+        "properties": {
+          "voice": "alice",
+          "offset": {
+            "x": -60,
+            "y": 1210
+          },
+          "hints": "1,2,3,4,5",
+          "finish_on_key": "#",
+          "say": "And how happy were you with the time it took to get help?",
+          "language": "en-US",
+          "stop_gather": false,
+          "profanity_filter": "true",
+          "timeout": 10,
+          "number_of_digits": 1,
+          "speech_timeout": "auto",
+          "loop": 1,
+          "gather_language": "de-DE"
+        }
+      },
+      {
+        "name": "Thanks",
+        "type": "say-play",
+        "transitions": [
+          {
+            "event": "audioComplete"
+          }
+        ],
+        "properties": {
+          "voice": "alice",
+          "offset": {
+            "x": -40,
+            "y": 2100
+          },
+          "loop": 1,
+          "say": "Thanks for your answers {{flow.variables.answer1}} \n\nand {{flow.variables.answer2}}",
+          "language": "en-US"
+        }
+      },
+      {
+        "name": "Welcome",
+        "type": "say-play",
+        "transitions": [
+          {
+            "next": "FirstQuestion",
+            "event": "audioComplete"
+          }
+        ],
+        "properties": {
+          "voice": "alice",
+          "offset": {
+            "x": -70,
+            "y": 90
+          },
+          "loop": 1,
+          "say": "Thanks for your participation in this short survey",
+          "language": "en-US"
+        }
+      },
+      {
+        "name": "WithinRangeDigit1",
+        "type": "split-based-on",
+        "transitions": [
+          {
+            "next": "BackToFirstQuestion",
+            "event": "noMatch"
+          },
+          {
+            "next": "SaveDigit1",
+            "event": "match",
+            "conditions": [
+              {
+                "friendly_name": "If value regex ^[1-5]$",
+                "arguments": [
+                  "{{widgets.FirstQuestion.Digits}}"
+                ],
+                "type": "regex",
+                "value": "^[1-5]$"
+              }
+            ]
+          }
+        ],
+        "properties": {
+          "input": "{{widgets.FirstQuestion.Digits}}",
+          "offset": {
+            "x": -280,
+            "y": 530
+          }
+        }
+      },
+      {
+        "name": "BackToFirstQuestion",
+        "type": "say-play",
+        "transitions": [
+          {
+            "next": "FirstQuestion",
+            "event": "audioComplete"
+          }
+        ],
+        "properties": {
+          "voice": "alice",
+          "offset": {
+            "x": -840,
+            "y": 790
+          },
+          "loop": 1,
+          "say": "I could recognize a valid answer.",
+          "language": "en-US"
+        }
+      },
+      {
+        "name": "WithinRangeSpeech1",
+        "type": "split-based-on",
+        "transitions": [
+          {
+            "next": "BackToFirstQuestion",
+            "event": "noMatch"
+          },
+          {
+            "next": "SaveSpeech1",
+            "event": "match",
+            "conditions": [
+              {
+                "friendly_name": "If value regex ^[1-5]$",
+                "arguments": [
+                  "{{widgets.FirstQuestion.SpeechResult}}"
+                ],
+                "type": "regex",
+                "value": "^[1-5]$"
+              }
+            ]
+          }
+        ],
+        "properties": {
+          "input": "{{widgets.FirstQuestion.SpeechResult}}",
+          "offset": {
+            "x": 150,
+            "y": 530
+          }
+        }
+      },
+      {
+        "name": "SaveDigit1",
+        "type": "set-variables",
+        "transitions": [
+          {
+            "next": "SecondQuestion",
+            "event": "next"
+          }
+        ],
+        "properties": {
+          "variables": [
+            {
+              "value": "{{widgets.Frage1.Digits}}",
+              "key": "answer1"
+            }
+          ],
+          "offset": {
+            "x": -260,
+            "y": 850
+          }
+        }
+      },
+      {
+        "name": "SaveSpeech1",
+        "type": "set-variables",
+        "transitions": [
+          {
+            "next": "SecondQuestion",
+            "event": "next"
+          }
+        ],
+        "properties": {
+          "variables": [
+            {
+              "value": "{{widgets.Frage1.SpeechResult}}",
+              "key": "answer1"
+            }
+          ],
+          "offset": {
+            "x": 110,
+            "y": 850
+          }
+        }
+      },
+      {
+        "name": "WithinRangeDigit2",
+        "type": "split-based-on",
+        "transitions": [
+          {
+            "next": "BackToSecondQuestion",
+            "event": "noMatch"
+          },
+          {
+            "next": "SaveDigit2",
+            "event": "match",
+            "conditions": [
+              {
+                "friendly_name": "If value regex ^[1-5]$",
+                "arguments": [
+                  "{{widgets.SecondQuestion.Digits}}"
+                ],
+                "type": "regex",
+                "value": "^[1-5]$"
+              }
+            ]
+          }
+        ],
+        "properties": {
+          "input": "{{widgets.SecondQuestion.Digits}}",
+          "offset": {
+            "x": -280,
+            "y": 1470
+          }
+        }
+      },
+      {
+        "name": "WithinRangeSpeech2",
+        "type": "split-based-on",
+        "transitions": [
+          {
+            "next": "BackToSecondQuestion",
+            "event": "noMatch"
+          },
+          {
+            "next": "SaveSpeech2",
+            "event": "match",
+            "conditions": [
+              {
+                "friendly_name": "If value regex ^[1-5]$",
+                "arguments": [
+                  "{{widgets.SecondQuestion.SpeechResult}}"
+                ],
+                "type": "regex",
+                "value": "^[1-5]$"
+              }
+            ]
+          }
+        ],
+        "properties": {
+          "input": "{{widgets.SecondQuestion.SpeechResult}}",
+          "offset": {
+            "x": 120,
+            "y": 1470
+          }
+        }
+      },
+      {
+        "name": "BackToSecondQuestion",
+        "type": "say-play",
+        "transitions": [
+          {
+            "next": "SecondQuestion",
+            "event": "audioComplete"
+          }
+        ],
+        "properties": {
+          "voice": "alice",
+          "offset": {
+            "x": -780,
+            "y": 1710
+          },
+          "loop": 1,
+          "say": "I could recognize a valid answer.",
+          "language": "en-US"
+        }
+      },
+      {
+        "name": "SaveSpeech2",
+        "type": "set-variables",
+        "transitions": [
+          {
+            "next": "Thanks",
+            "event": "next"
+          }
+        ],
+        "properties": {
+          "variables": [
+            {
+              "value": "{{widgets.Frage2.SpeechResult}}",
+              "key": "answer2"
+            }
+          ],
+          "offset": {
+            "x": 270,
+            "y": 1790
+          }
+        }
+      },
+      {
+        "name": "SaveDigit2",
+        "type": "set-variables",
+        "transitions": [
+          {
+            "next": "Thanks",
+            "event": "next"
+          }
+        ],
+        "properties": {
+          "variables": [
+            {
+              "value": "{{widgets.Frage2.Digits}}",
+              "key": "answer2"
+            }
+          ],
+          "offset": {
+            "x": -260,
+            "y": 1790
+          }
+        }
+      }
+    ],
+    "initial_state": "Trigger",
+    "flags": {
+      "allow_concurrent_calls": true
+    }
+  }
